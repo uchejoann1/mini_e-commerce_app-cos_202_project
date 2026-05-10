@@ -25,7 +25,7 @@ export function Footer() {
                     <div className="flex items-center gap-3">
                         {[FaTwitter, FaInstagram, FaYoutube, FaGithub].map((Icon, i) => (
                             <button key={i} 
-                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400">
+                            className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-gray-900 dark:hover:text-white transition-colors">
                                 <Icon className="h-4 w-4" />
                             </button>
                         ))}
@@ -41,7 +41,7 @@ export function Footer() {
                         { label: "Smartwatches", href: "/watches" },
                     ].map((link) => (
                         <li key={link.href}>
-                            <Link href={link.href} className="text-sm text-gray-500 dark:text-zinc-500">
+                            <Link href={link.href} className="text-sm text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                                 {link.label}
                             </Link>
                         </li>
@@ -53,7 +53,9 @@ export function Footer() {
                 <ul className="space-y-2">
                     {["About Us", "Careers", "Press", "Blog"].map((item) => (
                         <li key={item}>
-                            <span className="text-sm text-gray-500 dark:text-zinc-500 cursor-pointer">{item}</span>
+                            <span className="text-sm text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
+                                {item}
+                            </span>
                         </li>
                     ))}
                 </ul>
@@ -63,7 +65,9 @@ export function Footer() {
                 <ul className="space-y-2">
                     {["Help Center", "Shipping Info", "Returns", "Track Order", "Contact Us"].map((item) => (
                         <li key={item}>
-                            <span className="text-sm text-gray-500 dark:text-zinc-500 cursor-pointer">{item}</span>
+                            <span className="text-sm text-gray-500 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
+                                {item}
+                            </span>
                         </li>
                     ))}
                 </ul>
