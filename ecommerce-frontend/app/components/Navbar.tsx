@@ -19,9 +19,10 @@ export function Navbar() {
         <div className="flex h-16 items-center gap-4">
           {/* Logo Section */}
           <Link href="/" className="flex items-center gap-2 shrink-0 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 group-hover:bg-red-500 transition-colors">
+            <img src="favicon.ico" alt="T3chWorld Logo" className="h-10 w-10 rounded-lg" />
+            {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 group-hover:bg-red-500 transition-colors">
               <div className="h-4 w-4 text-white" />
-            </div>
+            </div> */}
             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
               T3ch<span className="text-red-500">World</span>
             </span>
