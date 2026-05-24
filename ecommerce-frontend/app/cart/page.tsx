@@ -43,7 +43,17 @@ export default function CartPage() {
     <Layout>
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-
+        {cartItems.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 dark:text-zinc-400 mb-6">Your cart is empty</p>
+            <Link href="/smartphones" className="inline-block bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+              Continue Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="cart-content-wrapper">
+          </div>
+        )}
       </div>
     </Layout>
   );
