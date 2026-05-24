@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Minus } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 export default function CartPage() {
   const router = useRouter();
@@ -89,6 +90,13 @@ export default function CartPage() {
                         </button>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-gray-400 hover:text-red-600 transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </div>
                 ))}
 
