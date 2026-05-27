@@ -12,4 +12,6 @@ Internal Database Url:postgresql://db_grp6_str2_user:Wp9NFWPUHNf8E1pcQ70OLkBB4zm
 External Database Url:postgresql://db_grp6_str2_user:Wp9NFWPUHNf8E1pcQ70OLkBB4zmPHpk9@dpg-d89lbi3bc2fs73fbmgjg-a.frankfurt-postgres.render.com/db_grp6_str2
 
 PSQL Command:PGPASSWORD=Wp9NFWPUHNf8E1pcQ70OLkBB4zmPHpk9 psql -h dpg-d89lbi3bc2fs73fbmgjg-a.frankfurt-postgres.render.com -U db_grp6_str2_user db_grp6_str2
+Render usage was scrapped changing to supabase
 
+Supabase password: GroupSix6767.
