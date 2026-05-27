@@ -1,25 +1,20 @@
 require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const subscriberRoutes = require('./routes/subscriberRoutes');
+const { createClient } = require('@supabase/supabase-js');
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+// Initialize Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/subscribe', subscriberRoutes);
+// Test the connection
+async function testConnection() {
+    const { data, error } = await supabase.from('products').select('*').limit(1);
+    if (error) {
+        console.error('Connection error:', error.message);
+    } else {
+        console.log('✅ Connected to Supabase successfully!');
+    }
+}
 
-app.get('/', (req, res) => res.send('E-Commerce API Running'));
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.log('❌ MongoDB error:', err));
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
+testConnection();
