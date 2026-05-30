@@ -12,12 +12,21 @@
     "@supabase/supabase-js": "^2.106.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/node": "^25.9.1",
+    "nodemon": "^3.1.14",
+    "typescript": "^6.0.3"
   },
-  "keywords": ["supabase", "ecommerce", "api"],
+  "keywords": [
+    "supabase",
+    "ecommerce",
+    "api"
+  ],
   "author": "Wisdom",
   "license": "ISC"
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { serverSupabase, getUserFromRequest } from "@/lib/server-supabase";
+import { serverSupabase, getUserFromRequest } from "/Users/ethanogogo/Downloads/group6/Mini_E-Commerce_App-COS_202_Project/ecommerce-backend/lib/server-supabase.ts";
 
 export async function GET(req: Request) {
   const user = await getUserFromRequest(req);
