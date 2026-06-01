@@ -1,13 +1,14 @@
-"use client";
+import { Layout } from "../components/Layout";
+import { ProductCollection } from "../components/ProductCollections";
+import { searchCatalog } from "../data/catalog";
 
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import { Layout } from "@/components/Layout";
-import { ProductCollection } from "@/components/ProductCollection";
-
-function LaptopsContent() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q");
+export default function LaptopsPage({
+  searchParams,
+}: {
+  searchParams?: { q?: string };
+}) {
+  const query = searchParams?.q;
+  const products = searchCatalog("laptop", query);
 
   return (
     <Layout>
@@ -15,24 +16,10 @@ function LaptopsContent() {
         <ProductCollection
           title="Laptops"
           subtitle={query ? `Search results for "${query}"` : undefined}
-          filters={{ category: "laptop", q: query ?? undefined }}
+          products={products}
           emptyMessage="No laptops found."
         />
       </div>
     </Layout>
-  );
-}
-
-export default function LaptopsPage() {
-  return (
-    <Suspense fallback={
-      <Layout>
-        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12">
-          <p className="text-center text-gray-500 dark:text-zinc-400">Loading...</p>
-        </div>
-      </Layout>
-    }>
-      <LaptopsContent />
-    </Suspense>
   );
 }
