@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { serverSupabase, getUserFromRequest } from "/Users/ethanogogo/Downloads/group6/Mini_E-Commerce_App-COS_202_Project/ecommerce-backend/lib/server-supabase.ts";
+import { getUserFromRequest, serverSupabase } from "../../../lib/server-supabase";
+
+const USD_TO_NGN_RATE = 1358;
 
 export async function GET(req: Request) {
   const user = await getUserFromRequest(req);
@@ -39,15 +41,35 @@ export async function POST(req: Request) {
   if (!cartItems || cartItems.length === 0) return NextResponse.json({ error: "Cart empty" }, { status: 400 });
 
   const productIds = cartItems.map((c: any) => c.product_id);
-  const { data: products } = await serverSupabase.from("products").select("id,price").in("id", productIds);
+  const { data: products, error: productsError } = await serverSupabase
+    .from("products")
+    .select("id,price,stock,name")
+    .in("id", productIds);
+  if (productsError) return NextResponse.json({ error: productsError.message }, { status: 500 });
 
   let total = 0;
   const itemsToInsert: any[] = [];
   for (const c of cartItems) {
     const p = (products || []).find((x: any) => x.id === c.product_id);
+    if (!p) {
+      return NextResponse.json({ error: "One or more products in your cart no longer exist." }, { status: 400 });
+    }
+
+    const availableStock = Number(p.stock ?? 0);
+    if (availableStock < Number(c.quantity)) {
+      return NextResponse.json(
+        {
+          error: `${p.name} has only ${availableStock} left in stock.`,
+          productId: p.id,
+          availableStock,
+        },
+        { status: 409 },
+      );
+    }
+
     const price = p?.price ?? 0;
-    total += Number(price) * Number(c.quantity);
-    itemsToInsert.push({ product_id: c.product_id, quantity: c.quantity, price_at_purchase: price });
+    total += Number(price) * Number(c.quantity) * USD_TO_NGN_RATE;
+    itemsToInsert.push({ product_id: c.product_id, quantity: c.quantity, price_at_purchase: Number(price) * USD_TO_NGN_RATE });
   }
 
   const orderInsert: any = { user_id: user.id, total };
@@ -63,7 +85,35 @@ export async function POST(req: Request) {
   const orderId = orderData.id;
   const toInsert = itemsToInsert.map((it) => ({ ...it, order_id: orderId }));
   const { error: oiError } = await serverSupabase.from("order_items").insert(toInsert);
-  if (oiError) return NextResponse.json({ error: oiError.message }, { status: 500 });
+  if (oiError) {
+    await serverSupabase.from("orders").delete().eq("id", orderId);
+    return NextResponse.json({ error: oiError.message }, { status: 500 });
+  }
+
+  for (const cartItem of cartItems) {
+    const product = (products || []).find((p: any) => p.id === cartItem.product_id);
+    const currentStock = Number(product?.stock ?? 0);
+    const nextStock = currentStock - Number(cartItem.quantity);
+
+    const { data: stockUpdate, error: stockError } = await serverSupabase
+      .from("products")
+      .update({ stock: nextStock })
+      .eq("id", cartItem.product_id)
+      .eq("stock", currentStock)
+      .select("id")
+      .maybeSingle();
+
+    if (stockError || !stockUpdate) {
+      await serverSupabase.from("order_items").delete().eq("order_id", orderId);
+      await serverSupabase.from("orders").delete().eq("id", orderId);
+      return NextResponse.json(
+        {
+          error: "Inventory changed while placing your order. Please review your cart and try again.",
+        },
+        { status: 409 },
+      );
+    }
+  }
 
   await serverSupabase.from("cart_items").delete().eq("user_id", user.id);
 

@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { serverSupabase, getUserFromRequest } from "/Users/ethanogogo/Downloads/group6/Mini_E-Commerce_App-COS_202_Project/ecommerce-backend/lib/server-supabase.ts";
+import { getUserFromRequest, serverSupabase } from "../../../../lib/server-supabase";
 
 type RouteContext = {
   params: Promise<{ productId: string }>;
@@ -13,10 +13,29 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   const body = await req.json().catch(() => ({}));
   const { quantity } = body;
   if (quantity == null) return NextResponse.json({ error: "Missing quantity" }, { status: 400 });
+  const nextQuantity = Math.max(1, Number(quantity));
+
+  const { data: product, error: productError } = await serverSupabase
+    .from("products")
+    .select("id,stock,name")
+    .eq("id", productId)
+    .maybeSingle();
+  if (productError) return NextResponse.json({ error: productError.message }, { status: 500 });
+  if (!product) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+
+  if (nextQuantity > Number(product.stock ?? 0)) {
+    return NextResponse.json(
+      {
+        error: `${product.name} has only ${product.stock} left in stock.`,
+        availableStock: Number(product.stock ?? 0),
+      },
+      { status: 409 },
+    );
+  }
 
   const { data, error } = await serverSupabase
     .from("cart_items")
-    .update({ quantity })
+    .update({ quantity: nextQuantity })
     .eq("user_id", user.id)
     .eq("product_id", productId)
     .select()

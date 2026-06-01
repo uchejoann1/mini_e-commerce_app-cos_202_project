@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { serverSupabase } from "/Users/ethanogogo/Downloads/group6/Mini_E-Commerce_App-COS_202_Project/ecommerce-backend/lib/server-supabase.ts";
+import { serverSupabase } from "../../../../lib/server-supabase";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
