@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ArrowRight, Zap, Star } from "lucide-react";
 import type { Product } from "@/types";
-import { ProductCard } from "@/app/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
+import { formatNairaFromUsd } from "@/lib/currency";
 
 export function DealsSection({ dealProducts }: { dealProducts: Product[] }) {
   if (dealProducts.length === 0) return null;
@@ -63,11 +64,11 @@ export function DealsSection({ dealProducts }: { dealProducts: Product[] }) {
               <div>
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-2xl font-extrabold text-white">
-                    ${product.price.toLocaleString()}
+                    {formatNairaFromUsd(product.price)}
                   </span>
                   {product.original_price && (
                     <span className="text-sm text-zinc-600 line-through">
-                      ${product.original_price.toLocaleString()}
+                      {formatNairaFromUsd(product.original_price)}
                     </span>
                   )}
                   {product.original_price && (

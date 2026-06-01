@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Cpu, Twitter, Instagram, Youtube, Github } from "lucide-react";
+import { Cpu } from "lucide-react";
+import { FaGithub } from "react-icons/fa6";
 
 export function Footer() {
   return (
@@ -21,16 +22,16 @@ export function Footer() {
             <p className="text-sm text-gray-500 dark:text-zinc-500 leading-relaxed">
               Your premium destination for the latest tech devices. Curated selection, expert advice, and fast delivery.
             </p>
-            {/* Social media icon buttons */}
             <div className="flex items-center gap-3">
-              {[Twitter, Instagram, Youtube, Github].map((Icon, i) => (
-                <button
-                  key={i}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-gray-900 dark:hover:text-white transition-colors"
-                >
-                  <Icon className="h-4 w-4" />
-                </button>
-              ))}
+              <a
+                href="https://github.com/Uchejoann1/Mini_E-Commerce_App-COS_202_Project"
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-gray-900 dark:hover:text-white transition-colors"
+                aria-label="GitHub repository"
+              >
+                <FaGithub className="h-4 w-4" />
+              </a>
             </div>
           </div>
 

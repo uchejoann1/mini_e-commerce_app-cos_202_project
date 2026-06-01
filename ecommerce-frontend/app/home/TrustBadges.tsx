@@ -8,7 +8,7 @@ export function TrustBadges() {
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Truck, title: "Free Shipping", desc: "On orders over $500" },
+            { icon: Truck, title: "Free Shipping", desc: "On orders over ₦679,000" },
             { icon: RotateCcw, title: "30-Day Returns", desc: "No questions asked" },
             { icon: Shield, title: "2-Year Warranty", desc: "On all products" },
             { icon: Zap, title: "Fast Delivery", desc: "2-3 business days" },

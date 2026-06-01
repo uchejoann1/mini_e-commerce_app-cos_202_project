@@ -1,14 +1,13 @@
-import { Layout } from "../components/Layout";
-import { ProductCollection } from "../components/ProductCollections";
-import { searchCatalog } from "../data/catalog";
+import { Layout } from "@/components/Layout";
+import { ProductCollection } from "@/components/ProductCollection";
 
-export default function LaptopsPage({
+export default async function LaptopsPage({
   searchParams,
 }: {
-  searchParams?: { q?: string };
+  searchParams?: Promise<{ q?: string }>;
 }) {
-  const query = searchParams?.q;
-  const products = searchCatalog("laptop", query);
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams?.q;
 
   return (
     <Layout>
@@ -16,7 +15,7 @@ export default function LaptopsPage({
         <ProductCollection
           title="Laptops"
           subtitle={query ? `Search results for "${query}"` : undefined}
-          products={products}
+          filters={{ category: "laptop", q: query }}
           emptyMessage="No laptops found."
         />
       </div>

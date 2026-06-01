@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { formatNairaFromUsd } from "@/lib/currency";
 
 const heroSlides = [
   {
@@ -10,7 +11,7 @@ const heroSlides = [
     tag: "New Launch",
     title: "iPhone 15 Pro Max",
     subtitle: "Titanium design. A17 Pro chip. Pro camera system.",
-    price: "$1,199",
+    price: formatNairaFromUsd(1199),
     badge: "Starting from",
     cta: "Shop Now",
     href: "/smartphones",
@@ -23,7 +24,7 @@ const heroSlides = [
     tag: "Best Seller",
     title: "MacBook Pro M3",
     subtitle: "Supercharged by M3 Max. Up to 22 hours battery.",
-    price: "$3,499",
+    price: formatNairaFromUsd(3499),
     badge: "Starting from",
     cta: "Explore Laptops",
     href: "/laptops",
@@ -36,7 +37,7 @@ const heroSlides = [
     tag: "Most Popular",
     title: "Apple Watch Ultra 2",
     subtitle: "Built for endurance. Precision GPS. 60hr battery.",
-    price: "$799",
+    price: formatNairaFromUsd(799),
     badge: "Starting from",
     cta: "View Watches",
     href: "/watches",

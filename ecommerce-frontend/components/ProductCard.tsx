@@ -7,6 +7,8 @@ import { ShoppingCart, Star, Heart, Zap } from "lucide-react";
 import { Product } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { formatNairaFromUsd } from "@/lib/currency";
+import { getStockCount, getStockLabel, isInStock } from "@/lib/stock";
 
 interface ProductCardProps {
   product: Product;
@@ -31,12 +33,21 @@ export function ProductCard({ product, size = "md" }: ProductCardProps) {
     : 0;
 
   // Add product to cart; redirect to login if not signed in
+  const stockCount = getStockCount(product.stock);
+
   const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent the Link navigation when clicking the button
-    if (!user) { router.push("/login"); return; }
+    e.preventDefault();
+    if (!isInStock(product.stock)) return;
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     setAdding(true);
-    await addToCart(product.id);
-    setAdding(false);
+    try {
+      await addToCart(String(product.id));
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
@@ -102,22 +113,34 @@ export function ProductCard({ product, size = "md" }: ProductCardProps) {
           <span className="text-xs text-gray-400 dark:text-zinc-500">({product.review_count.toLocaleString()})</span>
         </div>
 
+        <p
+          className={`mb-3 text-xs font-medium ${
+            stockCount === 0
+              ? "text-red-600 dark:text-red-400"
+              : stockCount <= 5
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-emerald-600 dark:text-emerald-400"
+          }`}
+        >
+          {getStockLabel(product.stock)}
+        </p>
+
         {/* Price and add-to-cart button */}
         <div className="mt-auto flex items-end justify-between gap-2">
           <div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">${product.price.toLocaleString()}</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-white">{formatNairaFromUsd(product.price)}</p>
             {/* Strikethrough original price if discounted */}
             {product.original_price && (
-              <p className="text-xs text-gray-400 dark:text-zinc-600 line-through">${product.original_price.toLocaleString()}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-600 line-through">{formatNairaFromUsd(product.original_price)}</p>
             )}
           </div>
           <button
             onClick={handleAddToCart}
-            disabled={adding}
+            disabled={adding || stockCount === 0}
             className="flex items-center gap-1.5 bg-red-600 hover:bg-red-500 disabled:bg-gray-200 dark:disabled:bg-zinc-700 disabled:text-gray-400 dark:disabled:text-zinc-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors shrink-0"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
-            {adding ? "Adding..." : "Add"}
+            {adding ? "Adding..." : stockCount === 0 ? "Sold out" : "Add"}
           </button>
         </div>
       </div>
