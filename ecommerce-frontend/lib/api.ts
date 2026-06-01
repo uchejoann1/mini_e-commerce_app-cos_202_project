@@ -1,5 +1,12 @@
 import { Product } from "@/types";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
+
+function toApiUrl(path: string): string {
+	if (/^https?:\/\//i.test(path)) return path;
+	return `${API_BASE_URL}${path}`;
+}
+
 export type ProductFilters = {
 	category?: Product["category"];
 	q?: string;
@@ -9,7 +16,7 @@ export type ProductFilters = {
 };
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-	const response = await fetch(url, init);
+	const response = await fetch(toApiUrl(url), init);
 	const payload = await response.json().catch(() => null);
 
 	if (!response.ok) {
