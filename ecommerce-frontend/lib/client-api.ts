@@ -1,6 +1,17 @@
 import { supabase } from "@/lib/supabase";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
+
+function toApiUrl(path: string): string {
+	if (/^https?:\/\//i.test(path)) return path;
+	return `${API_BASE_URL}${path}`;
+}
+
 async function getAuthHeaders() {
+	if (!supabase) {
+		return {};
+	}
+
 	const {
 		data: { session },
 	} = await supabase.auth.getSession();
@@ -23,7 +34,7 @@ async function fetchJson<T>(url: string, init: RequestInit = {}): Promise<T> {
 	const authHeaders = await getAuthHeaders();
 	Object.entries(authHeaders).forEach(([key, value]) => headers.set(key, value));
 
-	const response = await fetch(url, { ...init, headers });
+	const response = await fetch(toApiUrl(url), { ...init, headers });
 	const payload = await response.json().catch(() => null);
 
 	if (!response.ok) {

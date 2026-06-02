@@ -58,8 +58,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Add a product to cart — increments quantity if already in cart, otherwise inserts new row
   const addToCart = async (productId: string) => {
     if (!user) return;
-    await apiPost("/api/cart", { product_id: productId });
-    await fetchCart();
+    try {
+      await apiPost("/api/cart", { product_id: productId });
+      await fetchCart();
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      throw error;
+    }
   };
 
   // Remove a single cart item by its row ID

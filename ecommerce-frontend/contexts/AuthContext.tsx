@@ -29,6 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // On mount: fetch the existing session, then subscribe to auth state changes
   useEffect(() => {
+    if (!supabase) {
+      setUser(null);
+      setSession(null);
+      setLoading(false);
+      return;
+    }
+
     // Check for an existing session (e.g. from a previous login)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -49,6 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign the user out via Supabase auth
   const signOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
   };
 

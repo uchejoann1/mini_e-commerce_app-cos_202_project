@@ -1,6 +1,8 @@
 import http from 'http'
 import { supabase } from './supabaseClient.js'
 
+const USD_TO_NGN_RATE = 1358
+
 // Helper to parse JSON body
 const parseBody = (req) =>
   new Promise((resolve, reject) => {
@@ -54,7 +56,7 @@ const server = http.createServer(async (req, res) => {
     const category = url.searchParams.get('category')
     const limit = parseInt(url.searchParams.get('limit') || '50')
     const featured = url.searchParams.get('featured') === 'true'
-    const isDeal = url.searchParams.get('deal') === 'true'
+    const isDeal = url.searchParams.get('isDeal') === 'true' || url.searchParams.get('deal') === 'true'
 
     let query = supabase.from('products').select('*')
     if (category) query = query.eq('category', category)
@@ -198,7 +200,7 @@ const server = http.createServer(async (req, res) => {
     let total = 0
     for (const item of cartItems) {
       const price = item.products?.price || 0
-      total += price * item.quantity
+      total += price * item.quantity * USD_TO_NGN_RATE
     }
 
     // Create order
@@ -219,7 +221,7 @@ const server = http.createServer(async (req, res) => {
       order_id: order.id,
       product_id: item.product_id,
       quantity: item.quantity,
-      price_at_purchase: item.products?.price || 0
+      price_at_purchase: (item.products?.price || 0) * USD_TO_NGN_RATE
     }))
     const { error: itemsError } = await supabase
       .from('order_items')

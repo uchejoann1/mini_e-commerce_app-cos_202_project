@@ -2,7 +2,7 @@
 
 import { TrendingUp } from "lucide-react";
 import type { Product } from "@/types";
-import { ProductCard } from "@/app/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 
 export function FeaturedProducts({ products }: { products: Product[] }) {
   if (products.length === 0) return null;

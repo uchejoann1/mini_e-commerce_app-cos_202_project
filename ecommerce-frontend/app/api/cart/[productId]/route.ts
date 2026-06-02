@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getUserFromRequest, serverSupabase } from "../../../../lib/server-supabase";
+import { getUserFromRequest, serverSupabase } from "@/lib/server-supabase";
 
 type RouteContext = {
   params: Promise<{ productId: string }>;

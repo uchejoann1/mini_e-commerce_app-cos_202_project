@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Minus } from "lucide-react";
 import { Trash2 } from "lucide-react";
+import { formatNairaFromUsd } from "@/lib/currency";
 
 export default function CartPage() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function CartPage() {
                         {item.product.name}
                       </h3>
                       <p className="text-gray-500 dark:text-zinc-400 text-sm mb-3">
-                        ${item.product.price.toLocaleString()}
+                        {formatNairaFromUsd(item.product.price)}
                       </p>
 
                       <div className="flex items-center gap-2">
@@ -108,7 +109,7 @@ export default function CartPage() {
               <div className="space-y-3 mb-6 pb-6 border-b border-gray-200 dark:border-zinc-800">
                 <div className="flex justify-between text-gray-600 dark:text-zinc-400">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toLocaleString()}</span>
+                  <span>{formatNairaFromUsd(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-zinc-400">
                   <span>Shipping</span>
@@ -116,12 +117,12 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-zinc-400">
                   <span>Tax</span>
-                  <span>${(cartTotal * 0.1).toLocaleString()}</span>
+                  <span>{formatNairaFromUsd(cartTotal * 0.1)}</span>
                 </div>
               </div>
               <div className="flex justify-between text-lg font-bold mb-6">
                 <span>Total</span>
-                <span>${(cartTotal * 1.1).toLocaleString()}</span>
+                <span>{formatNairaFromUsd(cartTotal * 1.1)}</span>
               </div>
               <button
                 onClick={() => router.push("/checkout")}

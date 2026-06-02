@@ -1,14 +1,13 @@
-import { Layout } from "../components/Layout";
-import { ProductCollection } from "../components/ProductCollections";
-import { searchCatalog } from "../data/catalog";
+import { Layout } from "@/components/Layout";
+import { ProductCollection } from "@/components/ProductCollection";
 
-export default function WatchesPage({
+export default async function WatchesPage({
   searchParams,
 }: {
-  searchParams?: { q?: string };
+  searchParams?: Promise<{ q?: string }>;
 }) {
-  const query = searchParams?.q;
-  const products = searchCatalog("watch", query);
+  const resolvedSearchParams = await searchParams;
+  const query = resolvedSearchParams?.q;
 
   return (
     <Layout>
@@ -16,7 +15,7 @@ export default function WatchesPage({
         <ProductCollection
           title="Smartwatches"
           subtitle={query ? `Search results for "${query}"` : undefined}
-          products={products}
+          filters={{ category: "smartwatch", q: query }}
           emptyMessage="No smartwatches found."
         />
       </div>

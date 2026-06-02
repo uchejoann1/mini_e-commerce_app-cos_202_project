@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserFromRequest, serverSupabase } from "../../../lib/server-supabase";
+import { getUserFromRequest, serverSupabase } from "@/lib/server-supabase";
 
 const USD_TO_NGN_RATE = 1358;
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const enriched = [] as any[];
+  const enriched = [];
   for (const o of orders || []) {
     const { data: items } = await serverSupabase
       .from("order_items")
@@ -38,9 +38,11 @@ export async function POST(req: Request) {
     .select("product_id, quantity")
     .eq("user_id", user.id);
   if (cartError) return NextResponse.json({ error: cartError.message }, { status: 500 });
-  if (!cartItems || cartItems.length === 0) return NextResponse.json({ error: "Cart empty" }, { status: 400 });
+  if (!cartItems || cartItems.length === 0) {
+    return NextResponse.json({ error: "Cart empty" }, { status: 400 });
+  }
 
-  const productIds = cartItems.map((c: any) => c.product_id);
+  const productIds = cartItems.map((c) => c.product_id);
   const { data: products, error: productsError } = await serverSupabase
     .from("products")
     .select("id,price,stock,name")
@@ -48,11 +50,19 @@ export async function POST(req: Request) {
   if (productsError) return NextResponse.json({ error: productsError.message }, { status: 500 });
 
   let total = 0;
-  const itemsToInsert: any[] = [];
+  const itemsToInsert: {
+    product_id: string;
+    quantity: number;
+    price_at_purchase: number;
+  }[] = [];
+
   for (const c of cartItems) {
-    const p = (products || []).find((x: any) => x.id === c.product_id);
+    const p = (products || []).find((x) => x.id === c.product_id);
     if (!p) {
-      return NextResponse.json({ error: "One or more products in your cart no longer exist." }, { status: 400 });
+      return NextResponse.json(
+        { error: "One or more products in your cart no longer exist." },
+        { status: 400 },
+      );
     }
 
     const availableStock = Number(p.stock ?? 0);
@@ -69,10 +79,17 @@ export async function POST(req: Request) {
 
     const price = p?.price ?? 0;
     total += Number(price) * Number(c.quantity) * USD_TO_NGN_RATE;
-    itemsToInsert.push({ product_id: c.product_id, quantity: c.quantity, price_at_purchase: Number(price) * USD_TO_NGN_RATE });
+    itemsToInsert.push({
+      product_id: c.product_id,
+      quantity: c.quantity,
+      price_at_purchase: Number(price) * USD_TO_NGN_RATE,
+    });
   }
 
-  const orderInsert: any = { user_id: user.id, total };
+  const orderInsert: { user_id: string; total: number; shipping_address?: string } = {
+    user_id: user.id,
+    total,
+  };
   if (shippingAddress) orderInsert.shipping_address = shippingAddress;
 
   const { data: orderData, error: orderError } = await serverSupabase
@@ -91,7 +108,7 @@ export async function POST(req: Request) {
   }
 
   for (const cartItem of cartItems) {
-    const product = (products || []).find((p: any) => p.id === cartItem.product_id);
+    const product = (products || []).find((p) => p.id === cartItem.product_id);
     const currentStock = Number(product?.stock ?? 0);
     const nextStock = currentStock - Number(cartItem.quantity);
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { serverSupabase } from "../../../lib/server-supabase";
+import { serverSupabase } from "@/lib/server-supabase";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -13,7 +13,11 @@ export async function GET(req: Request) {
   if (category) builder = builder.eq("category", category);
   if (featured) builder = builder.eq("featured", true);
   if (isDeal) builder = builder.eq("is_deal", true);
-  if (query) builder = builder.or(`name.ilike.%${query}%,description.ilike.%${query}%,brand.ilike.%${query}%`);
+  if (query) {
+    builder = builder.or(
+      `name.ilike.%${query}%,description.ilike.%${query}%,brand.ilike.%${query}%`,
+    );
+  }
   if (limit > 0) builder = builder.limit(limit);
 
   const { data, error } = await builder;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, ShoppingCart, Star, Heart, Zap } from "lucide-react";
 import { Layout } from "../components/Layout";
+import { formatNairaFromUsd } from "@/lib/currency";
 
 type Product = {
   id: string | number;
@@ -133,11 +134,11 @@ export default function ProductPageUI({
             <div className="mb-6">
               <div className="flex items-baseline gap-3">
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  ${product.price.toLocaleString()}
+                  {formatNairaFromUsd(product.price)}
                 </p>
                 {product.original_price && (
                   <p className="text-lg text-gray-400 line-through dark:text-zinc-600">
-                    ${product.original_price.toLocaleString()}
+                    {formatNairaFromUsd(product.original_price)}
                   </p>
                 )}
               </div>

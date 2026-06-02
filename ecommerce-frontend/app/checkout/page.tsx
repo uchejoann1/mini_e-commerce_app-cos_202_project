@@ -2,8 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Layout } from "../components/Layout";
+import { Layout } from "@/components/Layout";
+import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
+import { apiPost } from "@/lib/client-api";
+import { formatNairaFromUsd } from "@/lib/currency";
 
 type ShippingAddress = {
   full_name: string;
@@ -22,6 +27,10 @@ type CheckoutItem = {
 };
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { cartItems, cartTotal, clearCart } = useCart();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
@@ -33,11 +42,12 @@ export default function CheckoutPage() {
     country: "",
   });
 
-  const cartItems: CheckoutItem[] = [
-    { id: "1", name: "Sample Product 1", quantity: 1, price: 199 },
-    { id: "2", name: "Sample Product 2", quantity: 2, price: 99 },
-  ];
-  const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const checkoutItems: CheckoutItem[] = cartItems.map((item) => ({
+    id: item.id,
+    name: item.product.name,
+    quantity: item.quantity,
+    price: item.product.price,
+  }));
 
   const handleInputChange = (
     field: keyof ShippingAddress,
@@ -46,12 +56,78 @@ export default function CheckoutPage() {
     setShippingAddress((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!user) {
+      router.push("/login?next=/checkout");
+      return;
+    }
+
+    if (checkoutItems.length === 0) {
+      setError("Your cart is empty.");
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => setLoading(false), 500);
+
+    try {
+      const response = await apiPost<{ order: { id: string } }>("/api/orders", {
+        shippingAddress,
+      });
+
+      await clearCart();
+      router.push(`/checkout/success?orderId=${encodeURIComponent(response.order.id)}`);
+      router.refresh();
+    } catch (e: any) {
+      setError(e?.message ?? "Checkout failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (authLoading) {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12">
+          <p className="text-center text-gray-500 dark:text-zinc-400">Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="mb-4 text-2xl font-bold">Please sign in</h1>
+            <p className="mb-6 text-gray-500 dark:text-zinc-400">You need to sign in to checkout.</p>
+            <Link href="/login?next=/checkout" className="inline-block rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500">
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (checkoutItems.length === 0) {
+    return (
+      <Layout>
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center">
+            <h1 className="mb-4 text-2xl font-bold">Your cart is empty</h1>
+            <p className="mb-6 text-gray-500 dark:text-zinc-400">Add items to your cart before checkout.</p>
+            <Link href="/smartphones" className="inline-block rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500">
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
 
   return (
@@ -162,26 +238,26 @@ export default function CheckoutPage() {
           <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-lg p-6 h-fit">
             <h2 className="text-xl font-bold mb-6">Order Summary</h2>
             <div className="space-y-4 mb-6 pb-6 border-b border-gray-200 dark:border-zinc-800">
-              {cartItems.map((item) => (
+              {checkoutItems.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span className="text-gray-600 dark:text-zinc-400">{item.name} x {item.quantity}</span>
-                  <span className="font-semibold">${(item.price * item.quantity).toLocaleString()}</span>
+                  <span className="font-semibold">{formatNairaFromUsd(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
 
             <div className="space-y-3">
               <div className="flex justify-between text-gray-600 dark:text-zinc-400">
-                <span>Subtotal</span><span>${cartTotal.toLocaleString()}</span>
+                <span>Subtotal</span><span>{formatNairaFromUsd(cartTotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-zinc-400">
                 <span>Shipping</span><span>Free</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-zinc-400">
-                <span>Tax (10%)</span><span>${(cartTotal * 0.1).toLocaleString()}</span>
+                <span>Tax (10%)</span><span>{formatNairaFromUsd(cartTotal * 0.1)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-3 border-t border-gray-200 dark:border-zinc-800">
-                <span>Total</span><span>${(cartTotal * 1.1).toLocaleString()}</span>
+                <span>Total</span><span>{formatNairaFromUsd(cartTotal * 1.1)}</span>
               </div>
             </div>
           </div>

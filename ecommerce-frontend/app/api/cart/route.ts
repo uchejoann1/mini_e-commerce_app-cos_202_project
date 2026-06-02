@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserFromRequest, serverSupabase } from "../../../lib/server-supabase";
+import { getUserFromRequest, serverSupabase } from "@/lib/server-supabase";
 
 export async function GET(req: Request) {
   const user = await getUserFromRequest(req);
@@ -11,13 +11,16 @@ export async function GET(req: Request) {
     .eq("user_id", user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const userItems = (items || []).filter((i: any) => i && i.product_id);
-  const productIds = userItems.map((i: any) => i.product_id);
-  const { data: products } = await serverSupabase.from("products").select("*").in("id", productIds || []);
+  const userItems = (items || []).filter((i) => i && i.product_id);
+  const productIds = userItems.map((i) => i.product_id);
+  const { data: products } = await serverSupabase
+    .from("products")
+    .select("*")
+    .in("id", productIds.length ? productIds : ["00000000-0000-0000-0000-000000000000"]);
 
-  const enriched = userItems.map((it: any) => ({
+  const enriched = userItems.map((it) => ({
     ...it,
-    product: (products || []).find((p: any) => p.id === it.product_id) || null,
+    product: (products || []).find((p) => p.id === it.product_id) || null,
   }));
 
   return NextResponse.json(enriched);
@@ -80,11 +83,15 @@ export async function POST(req: Request) {
     );
   }
 
-  const { data, error } = await serverSupabase.from("cart_items").insert({
-    user_id: user.id,
-    product_id,
-    quantity: requestedQty,
-  }).select().maybeSingle();
+  const { data, error } = await serverSupabase
+    .from("cart_items")
+    .insert({
+      user_id: user.id,
+      product_id,
+      quantity: requestedQty,
+    })
+    .select()
+    .maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
@@ -95,7 +102,9 @@ export async function PATCH(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const { itemId, product_id, quantity } = body;
-  if (!itemId && !product_id) return NextResponse.json({ error: "Missing identifier" }, { status: 400 });
+  if (!itemId && !product_id) {
+    return NextResponse.json({ error: "Missing identifier" }, { status: 400 });
+  }
   if (quantity == null) return NextResponse.json({ error: "Missing quantity" }, { status: 400 });
   const nextQuantity = Math.max(1, Number(quantity));
 
@@ -126,16 +135,20 @@ export async function PATCH(req: Request) {
     );
   }
 
-  let query: any = serverSupabase.from("cart_items").update({ quantity: nextQuantity });
+  const query = serverSupabase.from("cart_items").update({ quantity: nextQuantity });
   if (itemId) {
     const { data, error } = await query.eq("id", itemId).eq("user_id", user.id).select().maybeSingle();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data);
-  } else {
-    const { data, error } = await query.eq("product_id", product_id).eq("user_id", user.id).select().maybeSingle();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
   }
+
+  const { data, error } = await query
+    .eq("product_id", product_id)
+    .eq("user_id", user.id)
+    .select()
+    .maybeSingle();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
 }
 
 export async function DELETE(req: Request) {
@@ -151,7 +164,10 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true });
   }
 
-  if (!itemId && !product_id) return NextResponse.json({ error: "Missing identifier" }, { status: 400 });
+  if (!itemId && !product_id) {
+    return NextResponse.json({ error: "Missing identifier" }, { status: 400 });
+  }
+
   let query = serverSupabase.from("cart_items").delete();
   if (itemId) query = query.eq("id", itemId).eq("user_id", user.id);
   else query = query.eq("product_id", product_id).eq("user_id", user.id);
