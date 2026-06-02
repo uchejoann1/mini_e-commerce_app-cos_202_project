@@ -1,4 +1,4 @@
-# Mini_E-Commerce_App-COS_202_Project
+# T3ch World
  Executive Summary
 
 This project is a full-stack digital marketplace designed to simulate a modern e-commerce storefront. Developed as a project for COS 202, the application, named T3chWorld, provides an end-to-end retail experience where users can seamlessly browse hardware products, filter inventory by device categories, and walk through a simulated order checkout pipeline.
